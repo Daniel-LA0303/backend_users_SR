@@ -40,7 +40,7 @@ public class UserServiceImpl implements UserService{
 	}
 
 	@Override
-	@Transactional(readOnly = true)
+	@Transactional
 	public void remove(Long id) {
 		// TODO Auto-generated method stub
 		repository.deleteById(id);
