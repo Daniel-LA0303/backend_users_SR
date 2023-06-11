@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.demo.models.entities.User;
+import com.example.demo.models.request.UserRequest;
 import com.example.demo.repositories.UserRepository;
 
 
@@ -48,7 +49,7 @@ public class UserServiceImpl implements UserService{
 
 	@Override
 	@Transactional
-	public Optional<User> update(User user, Long id) {
+	public Optional<User> update(UserRequest user, Long id) {
 		// TODO Auto-generated method stub
 		Optional<User> o = this.findById(id);
 		User userOptional = null;
