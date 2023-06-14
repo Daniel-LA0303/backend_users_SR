@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.example.demo.auth.TokenJwtConfig;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -70,10 +71,10 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 		
 		String username = ((org.springframework.security.core.userdetails.User) authResult.getPrincipal()).getUsername();
 		
-		String originalInputString = "secreta"+username.getBytes();
+		String originalInputString = TokenJwtConfig.SECRET + "." + username;
 		String token= Base64.getEncoder().encodeToString(originalInputString.getBytes());
 		
-		response.addHeader("Authorization", "Bearer" + token);
+		response.addHeader(TokenJwtConfig.SECRET_KEY, TokenJwtConfig.PREFIX_TOKEN + token);
 		
 		Map<String, Object> body = new HashMap<>();
 		body.put("token", token);
