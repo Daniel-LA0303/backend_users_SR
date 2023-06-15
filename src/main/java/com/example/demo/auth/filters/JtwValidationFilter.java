@@ -2,6 +2,9 @@ package com.example.demo.auth.filters;
 
 import com.example.demo.auth.TokenJwtConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,6 +27,7 @@ public class JtwValidationFilter extends BasicAuthenticationFilter {
     }
 
     @Override
+    //here the token is validated
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
 
         String header = request.getHeader(TokenJwtConfig.SECRET_KEY);
@@ -34,24 +38,22 @@ public class JtwValidationFilter extends BasicAuthenticationFilter {
 
         String token = header.replace(TokenJwtConfig.PREFIX_TOKEN, "");
 
-        //vaid token
-        byte[] tokenDecodeBytes = Base64.getDecoder().decode(token);
-        String tokenDecode = new String(tokenDecodeBytes);
-        System.out.println("tokenDecode: " + tokenDecode);
-        String[] tokenArr  = tokenDecode.split("\\.");
+        try {
 
-        String secret = tokenArr[0];
-        String username = tokenArr[1];
+            Claims claims = Jwts.parserBuilder().setSigningKey(TokenJwtConfig.SECRET).build().parseClaimsJws(token).getBody();
 
-        if (TokenJwtConfig.SECRET.equals(secret)){
+            String username = claims.getSubject();
+
+
             List<GrantedAuthority> authorities = new ArrayList<>();
             authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
             UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, null,authorities);
             //auth static here!
             SecurityContextHolder.getContext().setAuthentication(authenticationToken);
             chain.doFilter(request, response);
-        }else {
+        }catch (JwtException e){
             Map<String, String> body = new HashMap<>();
+            body.put("error", e.getMessage());
             body.put("message", "invalid token");
 
             response.getWriter().write(new ObjectMapper().writeValueAsString(body));
