@@ -3,6 +3,7 @@ package com.example.demo.services;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import com.example.demo.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,9 +34,14 @@ public class JpaUserDeatailsService implements UserDetailsService{
 
 		com.example.demo.models.entities.User user = o.orElseThrow();
 
-		List<GrantedAuthority> authorities =new ArrayList<>();
+		//get roles from db
+		List<GrantedAuthority> authorities = user.getRoles().stream().map(r ->
+				new SimpleGrantedAuthority(r.getName()))
+						.collect(Collectors.toList());
 
-		authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+		//authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+
+
 
 		return new User(user.getUsername(),
 				user.getPassword(),

@@ -1,8 +1,11 @@
 package com.example.demo.services;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import com.example.demo.models.entities.Role;
+import com.example.demo.repositories.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -22,6 +25,10 @@ public class UserServiceImpl implements UserService{
 
 	@Autowired
 	private PasswordEncoder passwordEncoder;
+
+
+	@Autowired
+	private RoleRepository roleRepository;
 
 	@Override
 	@Transactional(readOnly = true)
@@ -43,6 +50,17 @@ public class UserServiceImpl implements UserService{
 		// TODO Auto-generated method stub
 
 		user.setPassword(passwordEncoder.encode(user.getPassword())); //encrypting the password
+
+		Optional<Role> o = roleRepository.findByName("ROLE_USER");
+
+		List<Role> roles = new ArrayList<>();
+
+		if (o.isPresent()) {
+			roles.add(o.orElseThrow());
+		}
+		user.setRoles(roles);
+
+
 		return repository.save(user);
 	}
 
