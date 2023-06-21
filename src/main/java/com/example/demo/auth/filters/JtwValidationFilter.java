@@ -1,5 +1,6 @@
 package com.example.demo.auth.filters;
 
+import com.example.demo.auth.SimpleGrantedAuthorityJsonCreator;
 import com.example.demo.auth.TokenJwtConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
@@ -14,6 +15,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.jackson2.SimpleGrantedAuthorityMixin;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 import java.io.IOException;
@@ -42,11 +44,19 @@ public class JtwValidationFilter extends BasicAuthenticationFilter {
 
             Claims claims = Jwts.parserBuilder().setSigningKey(TokenJwtConfig.SECRET).build().parseClaimsJws(token).getBody();
 
+            //getting roles from token
+            Object authoritiesClaims = claims.get("authorities");
+
+
             String username = claims.getSubject();
 
 
-            List<GrantedAuthority> authorities = new ArrayList<>();
-            authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+            Collection<? extends GrantedAuthority> authorities = Arrays.asList(
+                    new ObjectMapper()
+                            .addMixIn(SimpleGrantedAuthority.class, SimpleGrantedAuthorityJsonCreator.class)
+                            .readValue(authoritiesClaims.toString().getBytes(), SimpleGrantedAuthority[].class));
+
+            //authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
             UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, null,authorities);
             //auth static here!
             SecurityContextHolder.getContext().setAuthentication(authenticationToken);

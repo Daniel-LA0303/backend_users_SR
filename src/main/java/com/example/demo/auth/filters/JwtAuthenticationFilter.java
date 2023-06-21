@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.*;
 
 import com.example.demo.auth.TokenJwtConfig;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -70,9 +71,17 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 		Authentication authResult) throws IOException, ServletException {
 		
 		String username = ((org.springframework.security.core.userdetails.User) authResult.getPrincipal()).getUsername();
-		
+
+		//getting roles of user
+		Collection <? extends GrantedAuthority> roles = authResult.getAuthorities();
+		boolean isAdmin = roles.stream().anyMatch(role -> role.getAuthority().equals("ROLE_ADMIN"));
+		Claims claims = Jwts.claims();
+		claims.put("authorities", new ObjectMapper().writeValueAsString(roles)); //convert json to string
+		claims.put("isAdmin", isAdmin);
+
 		//String originalInputString = TokenJwtConfig.SECRET + "." + username;
 		String token= Jwts.builder()
+				.setClaims(claims)
 				.setSubject(username)
 				.signWith(TokenJwtConfig.SECRET)
 				.setIssuedAt(new Date())

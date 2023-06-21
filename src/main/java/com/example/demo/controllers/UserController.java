@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import com.example.demo.models.dto.UserDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,13 +37,13 @@ public class UserController {
 	private UserService service;
 	
 	@GetMapping
-	private List<User> list(){
+	private List<UserDto> list(){
 		return service.findAll();
 	}
 	
 	@GetMapping("/{id}") //path variable
 	public ResponseEntity<?> show(@PathVariable Long id) {
-		Optional< User> userOptional = service.findById(id);
+		Optional< UserDto> userOptional = service.findById(id);
 		
 		if (userOptional.isPresent()) {
 			return ResponseEntity.ok(userOptional.orElseThrow());
@@ -66,7 +67,7 @@ public class UserController {
 			return validation(result);
 		}
 		//serach id or user
-		Optional<User> o = service.update(user, id);
+		Optional<UserDto> o = service.update(user, id);
 		
 		if (o.isPresent()) {
 			
@@ -79,7 +80,7 @@ public class UserController {
 	@DeleteMapping("/{id}")
 	public ResponseEntity<?> remove(@PathVariable Long id){
 		
-		Optional<User> o = service.findById(id);
+		Optional<UserDto> o = service.findById(id);
 		if (o.isPresent()) {
 			service.remove(id);
 			

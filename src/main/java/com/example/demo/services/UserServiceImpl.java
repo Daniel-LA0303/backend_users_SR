@@ -3,7 +3,10 @@ package com.example.demo.services;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+import com.example.demo.models.dto.UserDto;
+import com.example.demo.models.dto.mapper.DtoMapperUser;
 import com.example.demo.models.entities.Role;
 import com.example.demo.repositories.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,21 +35,23 @@ public class UserServiceImpl implements UserService{
 
 	@Override
 	@Transactional(readOnly = true)
-	public List<User> findAll() { //we could use a dto in this part
+	public List<UserDto> findAll() { //we could use a dto in this part
 		// TODO Auto-generated method stub
-		return (List<User>) repository.findAll();
+		List<User> users = (List<User>) repository.findAll();
+		return users.stream().map(user -> DtoMapperUser.builder().setUser(user).build()).collect(Collectors.toList());
 	}
 
 	@Override
 	@Transactional(readOnly = true)
-	public Optional<User> findById(Long id) {
+	public Optional<UserDto> findById(Long id) {
 		// TODO Auto-generated method stub
-		return repository.findById(id);
+		return repository.findById(id).map(user -> DtoMapperUser.builder().setUser(user).build());
+
 	}
 
 	@Override
 	@Transactional
-	public User save(User user) {
+	public UserDto save(User user) {
 		// TODO Auto-generated method stub
 
 		user.setPassword(passwordEncoder.encode(user.getPassword())); //encrypting the password
@@ -60,8 +65,7 @@ public class UserServiceImpl implements UserService{
 		}
 		user.setRoles(roles);
 
-
-		return repository.save(user);
+		return DtoMapperUser.builder().setUser(repository.save(user)).build();
 	}
 
 	@Override
@@ -73,19 +77,19 @@ public class UserServiceImpl implements UserService{
 
 	@Override
 	@Transactional
-	public Optional<User> update(UserRequest user, Long id) {
+	public Optional<UserDto> update(UserRequest user, Long id) {
 		// TODO Auto-generated method stub
-		Optional<User> o = this.findById(id);
+		Optional<User> o = repository.findById(id);
 		User userOptional = null;
 		if (o.isPresent()) {
 			User userDB = o.orElseThrow();
 			userDB.setUsername(user.getUsername());
 			userDB.setEmail(user.getEmail());
 			//return Optional.of(this.save(userDB));
-			userOptional = this.save(userDB);
+			userOptional = repository.save(userDB);
 		}
 		//return Optional.empty();
-		return Optional.ofNullable(userOptional);
+		return Optional.ofNullable(DtoMapperUser.builder().setUser(userOptional).build());
 	}
 
 	

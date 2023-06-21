@@ -41,8 +41,14 @@ public class SpringSecurityConfig {
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http.authorizeHttpRequests(authRules -> {
 			try {
+				//we define permissions depending on roles
 				authRules
 				        .requestMatchers(HttpMethod.GET, "/users").permitAll()
+						.requestMatchers(HttpMethod.GET, "/users/{id}").hasAnyRole("USER", "ADMIN")
+						.requestMatchers(HttpMethod.POST, "/users").hasRole("ADMIN")
+						.requestMatchers("/users/**").hasRole("ADMIN") //this represents the delete and put method
+						//.requestMatchers(HttpMethod.PUT, "/users/{id}").hasRole("ADMIN")
+						//.requestMatchers(HttpMethod.DELETE, "/users/{id}").hasRole("ADMIN")
 				        .anyRequest().authenticated()
 				        	.and()
 				        	.addFilter(new JwtAuthenticationFilter(authenticationConfiguration.getAuthenticationManager()))
