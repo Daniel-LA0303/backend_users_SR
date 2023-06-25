@@ -15,7 +15,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+//This class basically checks given the data if a user exists in the database
 @Service
 public class JpaUserDeatailsService implements UserDetailsService{
 
@@ -24,6 +24,7 @@ public class JpaUserDeatailsService implements UserDetailsService{
 
 	@Override
 	@Transactional(readOnly = true)
+	//this part validates that the user exists
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		// TODO Auto-generated method stub
 

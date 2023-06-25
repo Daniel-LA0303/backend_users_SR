@@ -23,11 +23,16 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter{
 
-	
+//This class works for a login, its methods are specifically for a login
+public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter //used to process JWT-based authentication (JSON Web Token)
+{// {
+
+
+	//will be used to authenticate user credentials
 	private AuthenticationManager authenticationManager;
-	
+
+	//takes a parameter of type AuthenticationManager. Used to inject an AuthenticationManager instance into the filter
 	public JwtAuthenticationFilter(AuthenticationManager authenticationManager) {
 		this.authenticationManager = authenticationManager;
 	}
@@ -37,7 +42,8 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
 			throws AuthenticationException {
 		// TODO Auto-generated method stub
-		
+
+		//we get the data that was sent from the front end such as the password and the username
 		User user = null;
 		String username = null;
 		String password = null;
@@ -61,12 +67,13 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 			e.printStackTrace();
 		}
 		
-		UsernamePasswordAuthenticationToken authnToken = new UsernamePasswordAuthenticationToken(username, password);
-		return authenticationManager.authenticate(authnToken);
+		UsernamePasswordAuthenticationToken authnToken = new UsernamePasswordAuthenticationToken(username, password); //represents a request for authentication based on username and password. creates a token
+		return authenticationManager.authenticate(authnToken); //the token previously created will be sent here, this calls internally to JpaUserDetailsService so as to comprobate the existence of the user where this token will be disarmed to have the password and username
 	}
 
 	@Override
 	//in this part the token is signed
+	//when the previous method is correct implies that the user’s verification has been correct so now a jwt will be signed and sent to the frontend
 	protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
 		Authentication authResult) throws IOException, ServletException {
 		
