@@ -30,8 +30,8 @@ public class DtoMapperUser {
         if (user == null) {
             throw new RuntimeException("User is null");
         }
-
-        UserDto userDto = new UserDto(this.user.getId(), this.user.getUsername(), this.user.getEmail());
+        boolean isAdmin = user.getRoles().stream().anyMatch(role -> "ROLE_ADMIN".equals(role.getName()));
+        UserDto userDto = new UserDto(this.user.getId(), this.user.getUsername(), this.user.getEmail(), isAdmin);
         return userDto;
     }
 }

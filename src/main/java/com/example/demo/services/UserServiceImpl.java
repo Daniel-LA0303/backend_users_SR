@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.example.demo.models.IUser;
 import com.example.demo.models.dto.UserDto;
 import com.example.demo.models.dto.mapper.DtoMapperUser;
 import com.example.demo.models.entities.Role;
@@ -56,13 +57,8 @@ public class UserServiceImpl implements UserService{
 
 		user.setPassword(passwordEncoder.encode(user.getPassword())); //encrypting the password
 
-		Optional<Role> o = roleRepository.findByName("ROLE_USER");
+		List<Role> roles = getRoles(user);
 
-		List<Role> roles = new ArrayList<>();
-
-		if (o.isPresent()) {
-			roles.add(o.orElseThrow());
-		}
 		user.setRoles(roles);
 
 		return DtoMapperUser.builder().setUser(repository.save(user)).build();
@@ -82,7 +78,11 @@ public class UserServiceImpl implements UserService{
 		Optional<User> o = repository.findById(id);
 		User userOptional = null;
 		if (o.isPresent()) {
+
+			List<Role> roles = getRoles(user);
+
 			User userDB = o.orElseThrow();
+			userDB.setRoles(roles);
 			userDB.setUsername(user.getUsername());
 			userDB.setEmail(user.getEmail());
 			//return Optional.of(this.save(userDB));
@@ -92,6 +92,21 @@ public class UserServiceImpl implements UserService{
 		return Optional.ofNullable(DtoMapperUser.builder().setUser(userOptional).build());
 	}
 
-	
+	private List<Role> getRoles(IUser user){
+		Optional<Role> ou = roleRepository.findByName("ROLE_USER");
+
+		List<Role> roles = new ArrayList<>();
+
+		if (ou.isPresent()) {
+			roles.add(ou.orElseThrow());
+		}
+		if(user.isAdmin()) {
+			Optional<Role> oa = roleRepository.findByName("ROLE_ADMIN");
+			if (oa.isPresent()) {
+				roles.add(oa.orElseThrow());
+			}
+		}
+		return roles;
+	}
 	
 }
